@@ -205,9 +205,15 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
         
         SVProgressHUDBackgroundColor = [UIColor whiteColor];
         SVProgressHUDForegroundColor = [UIColor blackColor];
+      if([[UIDevice currentDevice].systemVersion doubleValue] >= 7.0) {
         SVProgressHUDFont = [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
         SVProgressHUDSuccessImage = [[UIImage imageNamed:@"SVProgressHUD.bundle/success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         SVProgressHUDErrorImage = [[UIImage imageNamed:@"SVProgressHUD.bundle/error"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+      } else {
+        SVProgressHUDFont = [UIFont boldSystemFontOfSize:12];
+        SVProgressHUDSuccessImage = [UIImage imageNamed:@"SVProgressHUD.bundle/success"];
+        SVProgressHUDErrorImage = [UIImage imageNamed:@"SVProgressHUD.bundle/error"];
+      }
         SVProgressHUDRingThickness = 4;
     }
 	
@@ -264,10 +270,17 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
     
     if(string) {
         CGSize constraintSize = CGSizeMake(200, 300);
-        CGRect stringRect = [string boundingRectWithSize:constraintSize
-                                                 options:(NSStringDrawingUsesFontLeading|NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin)
-                                              attributes:@{NSFontAttributeName: self.stringLabel.font}
-                                                 context:NULL];
+      CGRect stringRect;
+      if([[UIDevice currentDevice].systemVersion doubleValue] >= 7.0) {
+        stringRect = [string boundingRectWithSize:constraintSize
+                                          options:(NSStringDrawingUsesFontLeading|NSStringDrawingTruncatesLastVisibleLine|NSStringDrawingUsesLineFragmentOrigin)
+                                       attributes:@{NSFontAttributeName: self.stringLabel.font}
+                                          context:NULL];
+      } else {
+        CGSize size = [string sizeWithFont:self.stringLabel.font
+                         constrainedToSize:constraintSize];
+        stringRect.size = size;
+      }
         stringWidth = stringRect.size.width;
         stringHeight = ceil(stringRect.size.height);
         
@@ -570,8 +583,10 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
     if(![self.class isVisible])
         [self.class show];
     
+  if([[UIDevice currentDevice].systemVersion doubleValue] >= 7.0) {
     self.imageView.tintColor = SVProgressHUDForegroundColor;
-    self.imageView.image = image;
+  }
+  self.imageView.image = image;
     self.imageView.hidden = NO;
     
     self.stringLabel.text = string;
@@ -752,7 +767,8 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
         
         _hudView.autoresizingMask = (UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin |
                                      UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleLeftMargin);
-        
+      
+      if([[UIDevice currentDevice].systemVersion doubleValue] >= 7.0) {
         UIInterpolatingMotionEffect *effectX = [[UIInterpolatingMotionEffect alloc] initWithKeyPath: @"center.x" type: UIInterpolatingMotionEffectTypeTiltAlongHorizontalAxis];
         effectX.minimumRelativeValue = @(-SVProgressHUDParallaxDepthPoints);
         effectX.maximumRelativeValue = @(SVProgressHUDParallaxDepthPoints);
@@ -763,7 +779,8 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
         
         [_hudView addMotionEffect: effectX];
         [_hudView addMotionEffect: effectY];
-        
+      }
+      
         [self addSubview:_hudView];
     }
     return _hudView;
