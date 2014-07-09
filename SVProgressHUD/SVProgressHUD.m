@@ -35,11 +35,11 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
 
 @interface SVProgressHUD ()
 
-@property (nonatomic, readwrite) SVProgressHUDMaskType maskType;
+//@property (nonatomic, readwrite) SVProgressHUDMaskType maskType;
 @property (nonatomic, strong, readonly) NSTimer *fadeOutTimer;
 @property (nonatomic, readonly, getter = isClear) BOOL clear;
 
-@property (nonatomic, strong) UIControl *overlayView;
+//@property (nonatomic, strong) UIControl *overlayView;
 @property (nonatomic, strong) UIView *hudView;
 @property (nonatomic, strong) UILabel *stringLabel;
 @property (nonatomic, strong) UIImageView *imageView;
@@ -57,10 +57,6 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
 - (void)showProgress:(float)progress
               status:(NSString*)string
             maskType:(SVProgressHUDMaskType)hudMaskType;
-
-- (void)showImage:(UIImage*)image
-           status:(NSString*)status
-         duration:(NSTimeInterval)duration;
 
 - (void)dismiss;
 
@@ -577,6 +573,9 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
 
 
 - (void)showImage:(UIImage *)image status:(NSString *)string duration:(NSTimeInterval)duration {
+    [self.fadeOutTimer invalidate];
+    self.fadeOutTimer = nil;
+  
     self.progress = -1;
     [self cancelRingLayerAnimation];
     

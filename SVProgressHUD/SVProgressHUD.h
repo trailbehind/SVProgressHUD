@@ -64,6 +64,13 @@ typedef NSUInteger SVProgressHUDMaskType;
 
 + (BOOL)isVisible;
 
+//TB additions
++ (SVProgressHUD*)sharedView;
+@property (nonatomic, strong) UIControl *overlayView;
+@property (nonatomic, readwrite) SVProgressHUDMaskType maskType;
+- (void)showImage:(UIImage *)image status:(NSString *)string duration:(NSTimeInterval)duration;
+
+
 @end
 
 
