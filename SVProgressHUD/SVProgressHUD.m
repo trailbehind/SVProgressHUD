@@ -393,14 +393,16 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
     double animationDuration;
     
     UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
-    
+    // no transforms applied to window in iOS 8
+    BOOL ignoreOrientation = [[NSProcessInfo processInfo] respondsToSelector:@selector(operatingSystemVersion)];
+  
     if(notification) {
         NSDictionary* keyboardInfo = [notification userInfo];
         CGRect keyboardFrame = [[keyboardInfo valueForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue];
         animationDuration = [[keyboardInfo valueForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
         
         if(notification.name == UIKeyboardWillShowNotification || notification.name == UIKeyboardDidShowNotification) {
-            if(UIInterfaceOrientationIsPortrait(orientation))
+            if(ignoreOrientation || UIInterfaceOrientationIsPortrait(orientation))
                 keyboardHeight = keyboardFrame.size.height;
             else
                 keyboardHeight = keyboardFrame.size.width;
@@ -413,7 +415,7 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
     CGRect orientationFrame = [UIScreen mainScreen].bounds;
     CGRect statusBarFrame = [UIApplication sharedApplication].statusBarFrame;
     
-    if(UIInterfaceOrientationIsLandscape(orientation)) {
+   if(!ignoreOrientation && UIInterfaceOrientationIsLandscape(orientation)) {
         float temp = orientationFrame.size.width;
         orientationFrame.size.width = orientationFrame.size.height;
         orientationFrame.size.height = temp;
@@ -434,7 +436,11 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
     
     CGPoint newCenter;
     CGFloat rotateAngle;
-    
+  
+  if (ignoreOrientation) {
+    rotateAngle = 0.0;
+    newCenter = CGPointMake(posX, posY);
+  } else {
     switch (orientation) {
         case UIInterfaceOrientationPortraitUpsideDown:
             rotateAngle = M_PI;
@@ -453,7 +459,7 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
             newCenter = CGPointMake(posX, posY);
             break;
     }
-    
+  }
     if(notification) {
         [UIView animateWithDuration:animationDuration
                               delay:0
@@ -483,13 +489,13 @@ static const CGFloat SVProgressHUDParallaxDepthPoints = 10;
 - (void)showProgress:(float)progress status:(NSString*)string maskType:(SVProgressHUDMaskType)hudMaskType {
     
     if(!self.overlayView.superview){
-        NSEnumerator *frontToBackWindows = [[[UIApplication sharedApplication]windows]reverseObjectEnumerator];
-        
-        for (UIWindow *window in frontToBackWindows)
-            if (window.keyWindow) {
-                [window addSubview:self.overlayView];
-                break;
-            }
+      NSEnumerator *frontToBackWindows = [[[UIApplication sharedApplication]windows]reverseObjectEnumerator];
+      for (UIWindow *window in frontToBackWindows) {
+        if (window.keyWindow) {
+          [window addSubview:self.overlayView];
+          break;
+        }
+      }
     }
     
     if(!self.superview)
